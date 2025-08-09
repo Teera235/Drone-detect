@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEERATHAP TACTICAL SYSTEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Matrix rain effect */
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.1;
+        }
+        
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, #000 0%, #003333 50%, #000 100%);
+            border-bottom: 2px solid #00ffff;
+            padding: 10px 20px;
+            text-align: center;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            animation: flicker 3s infinite;
+        }
+        
+        /* Main video area */
+        .video-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #001a1a 0%, #000 100%);
+        }
+        
+        #video-display {
+            max-width: 90%;
+            max-height: 90%;
+            border: 3px solid #00ffff;
+            box-shadow: 
+                0 0 20px #00ffff,
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        /* Video upload area */
+        .upload-area {
+            width: 600px;
+            height: 400px;
+            border: 3px dashed #00ffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        
+        .upload-area:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-area.dragover {
+            border-color: #ff0080;
+            background: rgba(255, 0, 128, 0.1);
+            transform: scale(1.05);
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        /* HUD Overlay */
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+        
+        /* Corner brackets */
+        .corner-brackets {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #00ffff;
+            animation: bracket-glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        .corner-brackets.top-left {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-brackets.top-right {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-brackets.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-brackets.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        /* Stats panel */
+        .stats-panel {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            padding: 15px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .stats-panel .header-bar {
+            background: #00ffff;
+            color: #000;
+            padding: 5px;
+            margin: -15px -15px 10px -15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .stat-line {
+            margin: 8px 0;
+            color: #00ff00;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-value {
+            color: #ffffff;
+        }
+        
+        /* Radar */
+        .radar {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            border: 2px solid #00ff00;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, #00ff00, transparent);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(0deg);
+            animation: radar-sweep 3s linear infinite;
+        }
+        
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .control-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 10px 20px;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px #00ffff;
+            transform: scale(1.1);
+        }
+        
+        .control-btn.active {
+            background: rgba(0, 255, 255, 0.3);
+            animation: button-pulse 1s infinite;
+        }
+        
+        /* Crosshair */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+        
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .crosshair::before {
+            top: 50%;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+        
+        .crosshair::after {
+            left: 50%;
+            top: 20px;
+            bottom: 20px;
+            width: 1px;
+            transform: translateX(-50%);
+        }
+        
+        /* Animations */
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #00ffff; }
+            to { box-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff; }
+        }
+        
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes bracket-glow {
+            from { filter: brightness(1) drop-shadow(0 0 5px #00ffff); }
+            to { filter: brightness(1.5) drop-shadow(0 0 15px #00ffff); }
+        }
+        
+        @keyframes radar-sweep {
+            from { transform: translate(-50%, -100%) rotate(0deg); }
+            to { transform: translate(-50%, -100%) rotate(360deg); }
+        }
+        
+        @keyframes button-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Signature */
+        .signature {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #00ffff;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            animation: signature-scroll 15s linear infinite;
+        }
+        
+        @keyframes signature-scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Detection boxes */
+        .detection-box {
+            position: absolute;
+            border: 2px solid #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            pointer-events: none;
+            animation: detection-pulse 1s infinite;
+        }
+        
+        .detection-box::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        @keyframes detection-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        /* Startup overlay */
+        .startup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: startup-fade 3s ease-out forwards;
+        }
+        
+        .startup-text {
+            font-size: 48px;
+            font-weight: 900;
+            text-align: center;
+            animation: startup-glow 2s ease-in-out infinite alternate;
+        }
+        
+        .startup-subtext {
+            font-size: 18px;
+            margin-top: 20px;
+            opacity: 0.7;
+            animation: startup-flicker 1s infinite;
+        }
+        
+        @keyframes startup-fade {
+            0%, 80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        @keyframes startup-glow {
+            from { text-shadow: 0 0 10px #00ffff; }
+            to { text-shadow: 0 0 30px #00ffff, 0 0 50px #00ffff; }
+        }
+        
+        @keyframes startup-flicker {
+            0%, 90% { opacity: 0.7; }
+            10% { opacity: 1; }
+        }
+        
+        .webcam-btn {
+            background: rgba(255, 0, 128, 0.2);
+            border: 2px solid #ff0080;
+            color: #ff0080;
+        }
+        
+        .webcam-btn:hover {
+            background: rgba(255, 0, 128, 0.4);
+            box-shadow: 0 0 15px #ff0080;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-rain"></canvas>
+    
+    <!-- Startup Overlay -->
+    <div class="startup-overlay">
+        <div class="startup-text">🔥 TEERATHAP TACTICAL SYSTEM 🔥</div>
+        <div class="startup-subtext">INITIALIZING CYBERPUNK PROTOCOL...</div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1> TEERATHAP INDUSTRY - HARDCORE LIGHT TRACKING SYSTEM </h1>
+        </div>
+        
+        <!-- Main Video Area -->
+        <div class="video-container">
+            <!-- Upload Area -->
+            <div class="upload-area" id="upload-area">
+                <div style="font-size: 48px; margin-bottom: 20px;">🎯</div>
+                <div style="font-size: 24px; margin-bottom: 10px;">DROP VIDEO FILE</div>
+                <div style="font-size: 16px; opacity: 0.7;">OR CLICK TO SELECT</div>
+                <div style="font-size: 14px; margin-top: 20px; opacity: 0.5;">MP4, AVI, MOV supported</div>
+            </div>
+            
+            <!-- Video Display -->
+            <video id="video-display" controls style="display: none;">
+                Your browser does not support the video tag.
+            </video>
+            
+            <!-- Canvas for processing -->
+            <canvas id="processing-canvas" style="display: none;"></canvas>
+            
+            <!-- HUD Overlay -->
+            <div class="hud-overlay">
+                <!-- Corner Brackets -->
+                <div class="corner-brackets top-left"></div>
+                <div class="corner-brackets top-right"></div>
+                <div class="corner-brackets bottom-left"></div>
+                <div class="corner-brackets bottom-right"></div>
+                
+                <!-- Crosshair -->
+                <div class="crosshair"></div>
+                
+                <!-- Stats Panel -->
+                <div class="stats-panel">
+                    <div class="header-bar">TACTICAL SYSTEM STATUS</div>
+                    <div class="stat-line">
+                        <span>FPS:</span>
+                        <span class="stat-value" id="fps-display">0.00</span>
+                    </div>
+                    <div class="stat-line">
+                        <span>TARGETS:</span>
+                        <span class="stat-value" id="targets-display">00</span>
+                    </div>
+                    <div class="stat-line">
+                        <span>PROCESSING:</span>
+                        <span class="stat-value" id="processing-display">0.0ms</span>
+                    </div>
+                    <div class="stat-line">
+                        <span>STATUS:</span>
+                        <span class="stat-value" id="status-display">STANDBY</span>
+                    </div>
+                    <div class="stat-line">
+                        <span>RUNTIME:</span>
+                        <span class="stat-value" id="runtime-display">00:00</span>
+                    </div>
+                    <div class="stat-line">
+                        <span>THRESHOLD:</span>
+                        <span class="stat-value" id="threshold-display">150</span>
+                    </div>
+                </div>
+                
+                <!-- Radar -->
+                <div class="radar">
+                    <div class="radar-sweep"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px;">RADAR</div>
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="webcam-btn">📹 WEBCAM</button>
+                <button class="control-btn" id="start-btn">🎯 START TRACKING</button>
+                <button class="control-btn" id="settings-btn">⚙️ SETTINGS</button>
+                <button class="control-btn" id="capture-btn">📸 CAPTURE</button>
+            </div>
+        </div>
+        
+        <!-- Signature -->
+        <div class="signature">
+            &gt;&gt;&gt; TEERATHAP INDUSTRY CYBERPUNK LIGHT TRACKING PROTOCOL V2.0 - TACTICAL ENGAGEMENT READY &lt;&lt;&lt;
+        </div>
+    </div>
+    
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" accept="video/*">
+    
+    <script>
+        // Matrix rain effect
+        const matrixCanvas = document.getElementById('matrix-rain');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        
+        const matrix = "TEERATHAPINDUSTRY01010101";
+        const matrixArray = matrix.split("");
+        
+        const fontSize = 10;
+        const columns = matrixCanvas.width / fontSize;
+        const drops = [];
+        
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        
+        function drawMatrix() {
+            matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            
+            matrixCtx.fillStyle = '#00ffff';
+            matrixCtx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 35);
+        
+        // Main application logic
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const videoDisplay = document.getElementById('video-display');
+        const processingCanvas = document.getElementById('processing-canvas');
+        const processingCtx = processingCanvas.getContext('2d');
+        
+        let isTracking = false;
+        let startTime = Date.now();
+        let frameCount = 0;
+        let detectionCount = 0;
+        let threshold = 150;
+        
+        // Stats update
+        function updateStats() {
+            const runtime = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(runtime / 60);
+            const seconds = runtime % 60;
+            
+            document.getElementById('fps-display').textContent = (frameCount / Math.max(runtime, 1)).toFixed(2);
+            document.getElementById('targets-display').textContent = detectionCount.toString().padStart(2, '0');
+            document.getElementById('runtime-display').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('threshold-display').textContent = threshold;
+            document.getElementById('status-display').textContent = isTracking ? 'TRACKING' : 'STANDBY';
+            document.getElementById('processing-display').textContent = '0.5ms';
+        }
+        
+        setInterval(updateStats, 100);
+        
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('video/')) {
+                loadVideo(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                loadVideo(e.target.files[0]);
+            }
+        });
+        
+        // Load video
+        function loadVideo(file) {
+            const url = URL.createObjectURL(file);
+            videoDisplay.src = url;
+            uploadArea.style.display = 'none';
+            videoDisplay.style.display = 'block';
+            document.getElementById('status-display').textContent = 'VIDEO LOADED';
+        }
+        
+        // Webcam access
+        document.getElementById('webcam-btn').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoDisplay.srcObject = stream;
+                uploadArea.style.display = 'none';
+                videoDisplay.style.display = 'block';
+                document.getElementById('status-display').textContent = 'WEBCAM ACTIVE';
+            } catch (err) {
+                alert('Webcam access denied or not available');
+            }
+        });
+        
+        // Start tracking
+        document.getElementById('start-btn').addEventListener('click', () => {
+            isTracking = !isTracking;
+            const btn = document.getElementById('start-btn');
+            if (isTracking) {
+                btn.textContent = '⏸️ STOP TRACKING';
+                btn.classList.add('active');
+                startTracking();
+            } else {
+                btn.textContent = '🎯 START TRACKING';
+                btn.classList.remove('active');
+                stopTracking();
+            }
+        });
+        
+        // Tracking simulation
+        let trackingInterval;
+        
+        function startTracking() {
+            frameCount = 0;
+            startTime = Date.now();
+            
+            trackingInterval = setInterval(() => {
+                frameCount++;
+                // Simulate detections
+                detectionCount = Math.floor(Math.random() * 5);
+                
+                // Add some random detection boxes
+                document.querySelectorAll('.detection-box').forEach(box => box.remove());
+                
+                for (let i = 0; i < detectionCount; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'detection-box';
+                    box.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+                    box.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+                    box.style.width = '50px';
+                    box.style.height = '30px';
+                    document.querySelector('.hud-overlay').appendChild(box);
+                }
+            }, 100);
+        }
+        
+        function stopTracking() {
+            clearInterval(trackingInterval);
+            document.querySelectorAll('.detection-box').forEach(box => box.remove());
+            detectionCount = 0;
+        }
+        
+        // Settings
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            const newThreshold = prompt('Enter brightness threshold (50-255):', threshold);
+            if (newThreshold && !isNaN(newThreshold)) {
+                threshold = Math.max(50, Math.min(255, parseInt(newThreshold)));
+            }
+        });
+        
+        // Capture
+        document.getElementById('capture-btn').addEventListener('click', () => {
+            // Simulate capture
+            document.getElementById('capture-btn').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('capture-btn').classList.remove('active');
+                alert('Frame captured! (Simulated)');
+            }, 500);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'q':
+                    if (confirm('Exit Tactical System?')) {
+                        window.close();
+                    }
+                    break;
+                case 's':
+                    document.getElementById('capture-btn').click();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    document.getElementById('start-btn').click();
+                    break;
+            }
+        });
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
