@@ -10,7 +10,7 @@ from ultralytics import YOLO
 
 # ------------------ CONFIG ------------------
 MODEL_PATH = "best.pt"
-CAMERA_SOURCE = "rtsp://192.168.1.50:8080/h264_pcm.sdp"   # ใส่ 0 สำหรับเว็บแคม หรือ URL RTSP/HTTP จากมือถือ
+CAMERA_SOURCE = "rtsp://192.168.1.35:8080/h264_pcm.sdp"   # ใส่ 0 สำหรับเว็บแคม หรือ URL RTSP/HTTP จากมือถือ
 IMG_SIZE = 640               # 320/416/512/640 — ยิ่งเล็กยิ่งไว
 CONF_THRES = 0.5
 TARGET_CLASSES = {"drone"}   # ชื่อคลาสที่สนใจ (ต้องตรงกับ model.names)
@@ -176,3 +176,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
