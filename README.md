@@ -104,7 +104,7 @@ python main.py [options]
    - ตรวจสอบสิทธิ์การเข้าถึง COM Port
 
 
-![Detection Example](image/ex1.jpg)
+![Detection Example](image/ex1.JPG)
 ![alt text](image/DIAGRAM.png)
 
 
