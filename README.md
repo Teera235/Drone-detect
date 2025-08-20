@@ -106,7 +106,7 @@ python main.py [options]
 
 ![Detection Example](image/ex1.JPG)
 ![alt text](image/DIAGRAM.png)
-[▶️ Watch Demo Video](image/video.mp4)
+![Demo](image/video.gif)
 
 
 
