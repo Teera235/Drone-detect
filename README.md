@@ -104,6 +104,10 @@ python main.py [options]
    - ตรวจสอบสิทธิ์การเข้าถึง COM Port
 
 
+![Detection Example](image/ex1.jpg)
+![alt text](image/DIAGRAM.png)
+
+
 
 พัฒนาโดย: TEERATHAP YAISUNGNOEN
 สถาบัน: King Mongkut's University of Technology Thonburi (KMUTT)
